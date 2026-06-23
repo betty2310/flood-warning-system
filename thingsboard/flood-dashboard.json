@@ -1,0 +1,1601 @@
+{
+  "title": "Flood Early Warning — Red River",
+  "image": null,
+  "mobileHide": false,
+  "mobileOrder": null,
+  "name": "Flood Early Warning — Red River",
+  "resources": [],
+  "configuration": {
+    "description": "Correlated Red River flood scenario: water level, station map, alert levels, RPC controls.",
+    "widgets": {
+      "10000000-0000-0000-0000-000000000001": {
+        "id": "10000000-0000-0000-0000-000000000001",
+        "typeFullFqn": "system.map",
+        "type": "latest",
+        "sizeX": 12,
+        "sizeY": 7,
+        "row": 0,
+        "col": 0,
+        "config": {
+          "title": "Bản đồ trạm — sông Hồng",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "datasources": [],
+          "settings": {
+            "mapType": "geoMap",
+            "layers": [
+              {
+                "label": "OpenStreetMap",
+                "provider": "openstreet",
+                "layerType": "OpenStreetMap.Mapnik"
+              }
+            ],
+            "fitMapBounds": true,
+            "useDefaultCenterPosition": false,
+            "defaultCenterPosition": "21.3,105.3",
+            "defaultZoomLevel": 7,
+            "mapPageSize": 16384,
+            "markers": [
+              {
+                "dsType": "entity",
+                "dsLabel": "",
+                "dsDeviceId": null,
+                "dsEntityAliasId": "a0000000-0000-0000-0000-000000000001",
+                "dsFilterId": null,
+                "xKey": {
+                  "name": "latitude",
+                  "label": "latitude",
+                  "type": "attribute",
+                  "settings": {},
+                  "color": "#2196f3"
+                },
+                "yKey": {
+                  "name": "longitude",
+                  "label": "longitude",
+                  "type": "attribute",
+                  "settings": {},
+                  "color": "#4caf50"
+                },
+                "additionalDataKeys": [
+                  {
+                    "name": "water_level",
+                    "type": "timeseries",
+                    "label": "water_level",
+                    "color": "#f44336",
+                    "settings": {},
+                    "_hash": 0.31,
+                    "units": "m",
+                    "decimals": 2,
+                    "aggregationType": null,
+                    "usePostProcessing": null,
+                    "postFuncBody": null
+                  }
+                ],
+                "label": {
+                  "show": true,
+                  "type": "pattern",
+                  "pattern": "${entityName}"
+                },
+                "tooltip": {
+                  "show": true,
+                  "trigger": "click",
+                  "autoclose": true,
+                  "type": "pattern",
+                  "pattern": "<b>${entityName}</b><br/>Mực nước: ${water_level} m",
+                  "offsetX": 0,
+                  "offsetY": -1
+                },
+                "groups": null,
+                "markerType": "shape",
+                "markerShape": {
+                  "shape": "markerShape1",
+                  "size": 34,
+                  "color": {
+                    "type": "function",
+                    "color": "#307FE5",
+                    "colorFunction": "var lvl = data['water_level'];\nif (lvl >= 4.0) return '#D81838';\nif (lvl >= 3.0) return '#FFA500';\nif (typeof lvl !== 'undefined') return '#4CAF50';\nreturn '#307FE5';"
+                  }
+                },
+                "markerOffsetX": 0.5,
+                "markerOffsetY": 1
+              }
+            ],
+            "polygons": [],
+            "circles": [],
+            "additionalDataSources": []
+          },
+          "actions": {}
+        }
+      },
+      "10000000-0000-0000-0000-000000000002": {
+        "id": "10000000-0000-0000-0000-000000000002",
+        "typeFullFqn": "system.time_series_chart",
+        "type": "timeseries",
+        "sizeX": 12,
+        "sizeY": 7,
+        "row": 0,
+        "col": 12,
+        "config": {
+          "title": "Mực nước theo thời gian (water level)",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "useDashboardTimewindow": true,
+          "datasources": [
+            {
+              "type": "entity",
+              "name": "",
+              "entityAliasId": "a0000000-0000-0000-0000-000000000001",
+              "dataKeys": [
+                {
+                  "name": "water_level",
+                  "type": "timeseries",
+                  "label": "Mực nước",
+                  "color": "#2196f3",
+                  "settings": {
+                    "yAxisId": "default",
+                    "showInLegend": true,
+                    "dataHiddenByDefault": false,
+                    "type": "line",
+                    "lineSettings": {
+                      "showLine": true,
+                      "step": false,
+                      "smooth": true,
+                      "lineType": "solid",
+                      "lineWidth": 2.5,
+                      "showPoints": false,
+                      "fillAreaSettings": {
+                        "type": "none",
+                        "opacity": 0.2
+                      }
+                    }
+                  },
+                  "_hash": 0.5973804076994531,
+                  "units": "m",
+                  "decimals": 2,
+                  "aggregationType": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "latestDataKeys": null
+            }
+          ],
+          "settings": {
+            "showLegend": true,
+            "legendConfig": {
+              "direction": "column",
+              "position": "top",
+              "sortDataKeys": false,
+              "showMin": false,
+              "showMax": true,
+              "showAvg": false,
+              "showTotal": false,
+              "showLatest": true
+            },
+            "thresholds": [
+              {
+                "type": "constant",
+                "value": 3.0,
+                "yAxisId": "default",
+                "units": "m",
+                "decimals": 1,
+                "lineColor": "#FFA500",
+                "lineType": "dashed",
+                "lineWidth": 2,
+                "startSymbol": "none",
+                "startSymbolSize": 5,
+                "endSymbol": "arrow",
+                "endSymbolSize": 8,
+                "showLabel": true,
+                "labelPosition": "end",
+                "labelFont": {
+                  "size": 12,
+                  "family": "Roboto",
+                  "weight": "500",
+                  "style": "normal"
+                },
+                "labelColor": "#FFA500"
+              },
+              {
+                "type": "constant",
+                "value": 4.0,
+                "yAxisId": "default",
+                "units": "m",
+                "decimals": 1,
+                "lineColor": "#D81838",
+                "lineType": "dashed",
+                "lineWidth": 2,
+                "startSymbol": "none",
+                "startSymbolSize": 5,
+                "endSymbol": "arrow",
+                "endSymbolSize": 8,
+                "showLabel": true,
+                "labelPosition": "end",
+                "labelFont": {
+                  "size": 12,
+                  "family": "Roboto",
+                  "weight": "500",
+                  "style": "normal"
+                },
+                "labelColor": "#D81838"
+              }
+            ],
+            "dataZoom": true,
+            "stack": false,
+            "yAxes": {
+              "default": {
+                "id": "default",
+                "order": 0,
+                "units": "m",
+                "decimals": 2,
+                "show": true,
+                "label": "Mực nước (m)",
+                "position": "left",
+                "showTickLabels": true,
+                "showTicks": true,
+                "ticksColor": "rgba(0,0,0,0.54)",
+                "showLine": true,
+                "lineColor": "rgba(0,0,0,0.54)",
+                "showSplitLines": true,
+                "splitLinesColor": "rgba(0,0,0,0.12)"
+              }
+            },
+            "showTooltip": true,
+            "tooltipTrigger": "axis",
+            "tooltipShowDate": true
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000001": {
+        "id": "20000000-0000-0000-0000-000000000001",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 7,
+        "col": 0,
+        "config": {
+          "title": "Yên Bái — Pump",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000011"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "pump"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setPump",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setPump",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Pump",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000002": {
+        "id": "20000000-0000-0000-0000-000000000002",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 7,
+        "col": 8,
+        "config": {
+          "title": "Yên Bái — Gate",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000011"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "gate"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setGate",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setGate",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Gate",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000003": {
+        "id": "20000000-0000-0000-0000-000000000003",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 7,
+        "col": 16,
+        "config": {
+          "title": "Yên Bái — Siren",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000011"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "siren"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setSiren",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setSiren",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Siren",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000004": {
+        "id": "20000000-0000-0000-0000-000000000004",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 9,
+        "col": 0,
+        "config": {
+          "title": "Sơn Tây — Pump",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000012"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "pump"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setPump",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setPump",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Pump",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000005": {
+        "id": "20000000-0000-0000-0000-000000000005",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 9,
+        "col": 8,
+        "config": {
+          "title": "Sơn Tây — Gate",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000012"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "gate"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setGate",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setGate",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Gate",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000006": {
+        "id": "20000000-0000-0000-0000-000000000006",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 9,
+        "col": 16,
+        "config": {
+          "title": "Sơn Tây — Siren",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000012"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "siren"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setSiren",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setSiren",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Siren",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000007": {
+        "id": "20000000-0000-0000-0000-000000000007",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 11,
+        "col": 0,
+        "config": {
+          "title": "Hà Nội — Pump",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000013"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "pump"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setPump",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setPump",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Pump",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000008": {
+        "id": "20000000-0000-0000-0000-000000000008",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 11,
+        "col": 8,
+        "config": {
+          "title": "Hà Nội — Gate",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000013"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "gate"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setGate",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setGate",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Gate",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      },
+      "20000000-0000-0000-0000-000000000009": {
+        "id": "20000000-0000-0000-0000-000000000009",
+        "typeFullFqn": "system.single_switch",
+        "type": "rpc",
+        "sizeX": 8,
+        "sizeY": 2,
+        "row": 11,
+        "col": 16,
+        "config": {
+          "title": "Hà Nội — Siren",
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0,0,0,0.87)",
+          "padding": "8px",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "configMode": "basic",
+          "targetDevice": {
+            "type": "entity",
+            "entityAliasId": "a0000000-0000-0000-0000-000000000013"
+          },
+          "settings": {
+            "initialState": {
+              "action": "GET_TIME_SERIES",
+              "defaultValue": false,
+              "getTimeSeries": {
+                "key": "siren"
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "FUNCTION",
+                "compareToValue": true,
+                "dataToValueFunction": "return data === 'on' || data === 'open';"
+              }
+            },
+            "disabledState": {
+              "action": "DO_NOTHING",
+              "defaultValue": false,
+              "executeRpc": {
+                "method": "getState",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "getAttribute": {
+                "key": "state",
+                "scope": null
+              },
+              "getTimeSeries": {
+                "key": "state"
+              },
+              "getAlarmStatus": {
+                "severityList": null,
+                "typeList": null
+              },
+              "dataToValue": {
+                "type": "NONE",
+                "compareToValue": true,
+                "dataToValueFunction": "return data;"
+              }
+            },
+            "onUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setSiren",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": true,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "offUpdateState": {
+              "action": "EXECUTE_RPC",
+              "executeRpc": {
+                "method": "setSiren",
+                "requestTimeout": 5000,
+                "requestPersistent": false,
+                "persistentPollingInterval": 1000
+              },
+              "setAttribute": {
+                "key": "state",
+                "scope": "SERVER_SCOPE"
+              },
+              "putTimeSeries": {
+                "key": "state"
+              },
+              "valueToData": {
+                "type": "CONSTANT",
+                "constantValue": false,
+                "valueToDataFunction": "return value;"
+              }
+            },
+            "layout": "right",
+            "autoScale": true,
+            "showLabel": true,
+            "label": "Siren",
+            "labelFont": {
+              "family": "Roboto",
+              "size": 16,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "24px"
+            },
+            "labelColor": "rgba(0,0,0,0.76)",
+            "switchColorOn": "#5469FF",
+            "switchColorOff": "rgba(84,105,255,0.30)",
+            "tumblerColorOn": "#fff",
+            "tumblerColorOff": "#fff"
+          },
+          "actions": {}
+        }
+      }
+    },
+    "states": {
+      "default": {
+        "name": "Flood",
+        "root": true,
+        "layouts": {
+          "main": {
+            "gridSettings": {
+              "backgroundColor": "#eeeeee",
+              "color": "rgba(0,0,0,0.870588)",
+              "columns": 24,
+              "backgroundSizeMode": "100%",
+              "autoFillHeight": false,
+              "mobileAutoFillHeight": false,
+              "mobileRowHeight": 70,
+              "margin": 10,
+              "outerMargin": true,
+              "layoutType": "default"
+            },
+            "widgets": {
+              "10000000-0000-0000-0000-000000000001": {
+                "sizeX": 12,
+                "sizeY": 7,
+                "row": 0,
+                "col": 0
+              },
+              "10000000-0000-0000-0000-000000000002": {
+                "sizeX": 12,
+                "sizeY": 7,
+                "row": 0,
+                "col": 12
+              },
+              "20000000-0000-0000-0000-000000000001": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 7,
+                "col": 0
+              },
+              "20000000-0000-0000-0000-000000000002": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 7,
+                "col": 8
+              },
+              "20000000-0000-0000-0000-000000000003": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 7,
+                "col": 16
+              },
+              "20000000-0000-0000-0000-000000000004": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 9,
+                "col": 0
+              },
+              "20000000-0000-0000-0000-000000000005": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 9,
+                "col": 8
+              },
+              "20000000-0000-0000-0000-000000000006": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 9,
+                "col": 16
+              },
+              "20000000-0000-0000-0000-000000000007": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 11,
+                "col": 0
+              },
+              "20000000-0000-0000-0000-000000000008": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 11,
+                "col": 8
+              },
+              "20000000-0000-0000-0000-000000000009": {
+                "sizeX": 8,
+                "sizeY": 2,
+                "row": 11,
+                "col": 16
+              }
+            }
+          }
+        }
+      }
+    },
+    "entityAliases": {
+      "a0000000-0000-0000-0000-000000000001": {
+        "id": "a0000000-0000-0000-0000-000000000001",
+        "alias": "All Stations",
+        "filter": {
+          "type": "entityName",
+          "resolveMultiple": true,
+          "entityType": "DEVICE",
+          "entityNameFilter": "station-"
+        }
+      },
+      "a0000000-0000-0000-0000-000000000011": {
+        "id": "a0000000-0000-0000-0000-000000000011",
+        "alias": "station-01",
+        "filter": {
+          "type": "entityName",
+          "resolveMultiple": false,
+          "entityType": "DEVICE",
+          "entityNameFilter": "station-01"
+        }
+      },
+      "a0000000-0000-0000-0000-000000000012": {
+        "id": "a0000000-0000-0000-0000-000000000012",
+        "alias": "station-02",
+        "filter": {
+          "type": "entityName",
+          "resolveMultiple": false,
+          "entityType": "DEVICE",
+          "entityNameFilter": "station-02"
+        }
+      },
+      "a0000000-0000-0000-0000-000000000013": {
+        "id": "a0000000-0000-0000-0000-000000000013",
+        "alias": "station-03",
+        "filter": {
+          "type": "entityName",
+          "resolveMultiple": false,
+          "entityType": "DEVICE",
+          "entityNameFilter": "station-03"
+        }
+      }
+    },
+    "filters": {},
+    "timewindow": {
+      "displayValue": "",
+      "selectedTab": 0,
+      "hideAggregation": false,
+      "hideAggInterval": false,
+      "realtime": {
+        "interval": 1000,
+        "timewindowMs": 1800000
+      },
+      "aggregation": {
+        "type": "AVG",
+        "limit": 25000
+      }
+    },
+    "settings": {
+      "stateControllerId": "entity",
+      "showTitle": false,
+      "showDashboardsSelect": true,
+      "showEntitiesSelect": true,
+      "showDashboardTimewindow": true,
+      "showDashboardExport": true,
+      "toolbarAlwaysOpen": true,
+      "hideToolbar": false
+    }
+  }
+}

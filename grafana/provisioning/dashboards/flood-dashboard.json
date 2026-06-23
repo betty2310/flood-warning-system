@@ -1,0 +1,282 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["flood", "water", "iot"],
+  "templating": {
+    "list": [
+      {
+        "name": "bucket",
+        "type": "constant",
+        "label": "InfluxDB bucket",
+        "query": "flood",
+        "current": { "selected": false, "text": "flood", "value": "flood" },
+        "options": [ { "selected": true, "text": "flood", "value": "flood" } ],
+        "hide": 2
+      },
+      {
+        "name": "station",
+        "type": "custom",
+        "label": "Station",
+        "description": "Drives the repeated per-station panels (flow & quality, actuators).",
+        "query": "station-01,station-02,station-03",
+        "multi": true,
+        "includeAll": true,
+        "allValue": null,
+        "current": { "selected": true, "text": ["All"], "value": ["$__all"] },
+        "options": [
+          { "selected": true, "text": "All", "value": "$__all" },
+          { "selected": false, "text": "station-01", "value": "station-01" },
+          { "selected": false, "text": "station-02", "value": "station-02" },
+          { "selected": false, "text": "station-03", "value": "station-03" }
+        ],
+        "hide": 0
+      }
+    ]
+  },
+  "time": { "from": "now-10m", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Flood Early-Warning Gateway",
+  "uid": "flood-main",
+  "version": 2,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Water level per station (warning 3.0 / emergency 4.0)",
+      "description": "Full-width so the downstream flood wave (station-01 → 02 → 60s later 03) is visible. Zoom to ~10 min to read the lag.",
+      "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthm",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 5,
+            "showPoints": "never",
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 3.0, "color": "orange" },
+              { "value": 4.0, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"water_telemetry\" and r._field == \"water_level\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"station_id\"])\n  |> group(columns: [\"station_id\"])"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Rainfall per station (mm/h)",
+      "description": "Lines (not filled bars) so every station's rise/fall is visible — a filled style let the last-drawn station hide the others.",
+      "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 8 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"water_telemetry\" and r._field == \"rainfall\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"station_id\"])\n  |> group(columns: [\"station_id\"])"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Flow & quality — $station",
+      "description": "One panel per station. flow_rate + turbidity share the left axis; pH has its own right axis so it isn't flattened.",
+      "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+      "repeat": "station",
+      "repeatDirection": "h",
+      "maxPerRow": 3,
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 0, "showPoints": "never", "axisPlacement": "left" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "flow_rate" },
+            "properties": [
+              { "id": "custom.axisLabel", "value": "Flow (m³/s) / Turbidity (NTU)" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "turbidity" },
+            "properties": [
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "ph" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "right" },
+              { "id": "custom.axisLabel", "value": "pH" },
+              { "id": "min", "value": 0 },
+              { "id": "max", "value": 14 },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"water_telemetry\" and r.station_id == \"${station}\" and (r._field == \"flow_rate\" or r._field == \"turbidity\" or r._field == \"ph\"))\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> group(columns: [\"_field\"])"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "state-timeline",
+      "title": "Actuators — $station",
+      "description": "One state timeline per station: pump / gate / siren / board over time.",
+      "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+      "repeat": "station",
+      "repeatDirection": "h",
+      "maxPerRow": 3,
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 23 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "fillOpacity": 90, "lineWidth": 0 },
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "value": null, "color": "green" } ] },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "pump" },
+            "properties": [
+              { "id": "mappings", "value": [ { "type": "value", "options": {
+                "on":  { "text": "ON",  "color": "green",   "index": 0 },
+                "off": { "text": "off", "color": "#5a5d68", "index": 1 }
+              } } ] }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "gate" },
+            "properties": [
+              { "id": "mappings", "value": [ { "type": "value", "options": {
+                "open":   { "text": "OPEN",   "color": "blue",    "index": 0 },
+                "closed": { "text": "closed", "color": "#5a5d68", "index": 1 }
+              } } ] }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "siren" },
+            "properties": [
+              { "id": "mappings", "value": [ { "type": "value", "options": {
+                "on":  { "text": "ON",  "color": "red",     "index": 0 },
+                "off": { "text": "off", "color": "#5a5d68", "index": 1 }
+              } } ] }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "board" },
+            "properties": [
+              { "id": "mappings", "value": [ { "type": "value", "options": {
+                "normal":    { "text": "normal",    "color": "green",  "index": 0 },
+                "advisory":  { "text": "advisory",  "color": "yellow", "index": 1 },
+                "warning":   { "text": "warning",   "color": "orange", "index": 2 },
+                "emergency": { "text": "emergency", "color": "red",    "index": 3 }
+              } } ] }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "auto",
+        "alignValue": "center",
+        "rowHeight": 0.9,
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"actuator_status\" and r.station_id == \"${station}\" and (r._field == \"pump\" or r._field == \"gate\" or r._field == \"siren\" or r._field == \"board\"))\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])\n  |> group(columns: [\"_field\"])"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Event count by severity (advisory / warning / emergency)",
+      "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 31 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": { "drawStyle": "bars", "fillOpacity": 60, "lineWidth": 1, "stacking": { "mode": "normal" } }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"gateway_events\" and r._field == \"value\")\n  |> group(columns: [\"severity\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: count, createEmpty: false)\n  |> keep(columns: [\"_time\", \"_value\", \"severity\"])"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "Most recent events",
+      "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 37 },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": { "showHeader": true, "sortBy": [{ "displayName": "_time", "desc": true }] },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "influxdb-flood" },
+          "query": "from(bucket: \"${bucket}\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"gateway_events\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"_time\", \"station_id\", \"event_type\", \"severity\", \"value\", \"threshold\", \"action_taken\"])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 50)",
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}

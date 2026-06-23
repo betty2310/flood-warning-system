@@ -1,0 +1,169 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+    networks:
+      - flood-net
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USERNAME}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    networks:
+      - flood-net
+
+  grafana:
+    image: grafana/grafana:10.4.3
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      # Consumed by the provisioned datasource (grafana/provisioning/datasources)
+      INFLUXDB_URL: ${INFLUXDB_URL}
+      INFLUXDB_ORG: ${INFLUXDB_ORG}
+      INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - influxdb
+    networks:
+      - flood-net
+
+  # ---------------------------------------------------------------
+  # Virtual sensors — one image, three stations (env-parameterized)
+  # Stations differ ONLY by STATION_ID; the correlated basin storm and the
+  # per-station lag/base/cap/gain live in the BASIN table in sensor/sensor.py.
+  # ---------------------------------------------------------------
+  sensor-station-01:
+    build: ./sensor
+    container_name: sensor-station-01
+    env_file: .env
+    environment:
+      STATION_ID: station-01
+      DEVICE_ID: sensor-station-01
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+    networks:
+      - flood-net
+
+  sensor-station-02:
+    build: ./sensor
+    container_name: sensor-station-02
+    env_file: .env
+    environment:
+      STATION_ID: station-02
+      DEVICE_ID: sensor-station-02
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+    networks:
+      - flood-net
+
+  sensor-station-03:
+    build: ./sensor
+    container_name: sensor-station-03
+    env_file: .env
+    environment:
+      STATION_ID: station-03
+      DEVICE_ID: sensor-station-03
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+    networks:
+      - flood-net
+
+  # ---------------------------------------------------------------
+  # Virtual actuators — one image, three stations (env-parameterized)
+  # ---------------------------------------------------------------
+  actuator-station-01:
+    build: ./actuator
+    container_name: actuator-station-01
+    env_file: .env
+    environment:
+      STATION_ID: station-01
+      DEVICE_ID: actuator-station-01
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+    networks:
+      - flood-net
+
+  actuator-station-02:
+    build: ./actuator
+    container_name: actuator-station-02
+    env_file: .env
+    environment:
+      STATION_ID: station-02
+      DEVICE_ID: actuator-station-02
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+    networks:
+      - flood-net
+
+  actuator-station-03:
+    build: ./actuator
+    container_name: actuator-station-03
+    env_file: .env
+    environment:
+      STATION_ID: station-03
+      DEVICE_ID: actuator-station-03
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+    networks:
+      - flood-net
+
+  flood-gateway:
+    build: ./gateway
+    container_name: flood-gateway
+    env_file: .env
+    environment:
+      DEVICE_ID: flood-gateway
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+      - influxdb
+    networks:
+      - flood-net
+
+  flood-api:
+    build: ./flood-api
+    container_name: flood-api
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      PYTHONUNBUFFERED: "1"
+    depends_on:
+      - mosquitto
+      - influxdb
+    networks:
+      - flood-net
+
+volumes:
+  influxdb-data:
+  grafana-data:
+
+networks:
+  flood-net:
+    driver: bridge

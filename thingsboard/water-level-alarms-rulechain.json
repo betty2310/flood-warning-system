@@ -1,0 +1,113 @@
+{
+  "ruleChain": {
+    "additionalInfo": null,
+    "name": "Water Level Alarms",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbJsSwitchNode",
+        "name": "Phân loại mực nước",
+        "debugMode": false,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "tbelScript": "if (msg.water_level == null) {\n    return [];\n}\nif (msg.water_level > 4.0) {\n    return ['Emergency'];\n}\nif (msg.water_level > 3.0) {\n    return ['Warning'];\n}\nreturn ['Normal'];",
+          "jsScript": "if (msg.water_level === undefined || msg.water_level === null) {\n    return [];\n}\nif (msg.water_level > 4.0) {\n    return ['Emergency'];\n}\nif (msg.water_level > 3.0) {\n    return ['Warning'];\n}\nreturn ['Normal'];"
+        },
+        "additionalInfo": {
+          "layoutX": 200,
+          "layoutY": 240,
+          "description": "water_level > 4.0 -> Emergency; > 3.0 -> Warning; else Normal"
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Tạo cảnh báo KHẨN CẤP",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "Water Level Flood",
+          "scriptLang": "TBEL",
+          "alarmDetailsBuildTbel": "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n    metadata.remove('prevAlarmDetails');\n}\ndetails.waterLevel = msg.water_level;\nreturn details;",
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n    delete metadata.prevAlarmDetails;\n}\ndetails.waterLevel = msg.water_level;\nreturn details;",
+          "severity": "CRITICAL",
+          "propagate": false,
+          "propagateToOwner": false,
+          "propagateToTenant": false,
+          "useMessageAlarmData": false,
+          "overwriteAlarmDetails": false,
+          "dynamicSeverity": false,
+          "relationTypes": []
+        },
+        "additionalInfo": {
+          "layoutX": 560,
+          "layoutY": 90,
+          "description": "water_level > 4.0 m"
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Tạo cảnh báo CẢNH BÁO",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "Water Level Flood",
+          "scriptLang": "TBEL",
+          "alarmDetailsBuildTbel": "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n    metadata.remove('prevAlarmDetails');\n}\ndetails.waterLevel = msg.water_level;\nreturn details;",
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n    delete metadata.prevAlarmDetails;\n}\ndetails.waterLevel = msg.water_level;\nreturn details;",
+          "severity": "WARNING",
+          "propagate": false,
+          "propagateToOwner": false,
+          "propagateToTenant": false,
+          "useMessageAlarmData": false,
+          "overwriteAlarmDetails": false,
+          "dynamicSeverity": false,
+          "relationTypes": []
+        },
+        "additionalInfo": {
+          "layoutX": 560,
+          "layoutY": 240,
+          "description": "water_level > 3.0 m"
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "Gỡ cảnh báo",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "Water Level Flood",
+          "scriptLang": "TBEL",
+          "alarmDetailsBuildTbel": "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n    metadata.remove('prevAlarmDetails');\n}\nreturn details;",
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n    delete metadata.prevAlarmDetails;\n}\nreturn details;"
+        },
+        "additionalInfo": {
+          "layoutX": 560,
+          "layoutY": 390,
+          "description": "water_level <= 3.0 m"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "Emergency"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 2,
+        "type": "Warning"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 3,
+        "type": "Normal"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

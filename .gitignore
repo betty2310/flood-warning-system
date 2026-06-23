@@ -1,0 +1,12 @@
+# Local secrets — never commit real tokens
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store

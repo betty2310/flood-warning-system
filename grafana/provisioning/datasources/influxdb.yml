@@ -1,0 +1,17 @@
+apiVersion: 1
+
+# Values are interpolated from the grafana container's environment
+# (set in docker-compose.yml from your .env).
+datasources:
+  - name: InfluxDB
+    uid: influxdb-flood
+    type: influxdb
+    access: proxy
+    url: ${INFLUXDB_URL}
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: ${INFLUXDB_ORG}
+      defaultBucket: ${INFLUXDB_BUCKET}
+    secureJsonData:
+      token: ${INFLUXDB_TOKEN}
