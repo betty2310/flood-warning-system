@@ -10,7 +10,7 @@ MQTT. Three instances run in the stack (`sensor-station-01/02/03`), built from
 
 ```mermaid
 flowchart LR
-    ENV["env: STATION_ID, PUBLISH_INTERVAL, storm knobs"] --> SIM
+    ENV["env: STATION_ID, station profile, PUBLISH_INTERVAL, storm knobs"] --> SIM
     CLK["wall clock"] --> SIM["sensor.py<br/>storm → level integrator → reading"]
     SIM -->|"JSON every PUBLISH_INTERVAL s"| T["basin/&lt;station&gt;/sensor/telemetry"]
     T --> M(["mosquitto"])
@@ -38,11 +38,28 @@ MQTT_BROKER, PUBLISH_INTERVAL"*). Set in [`.env`](../.env.example) and
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `STATION_ID` | `station-01` | **Selects which station this container is** (keys into the `BASIN` table). |
+| `STATION_ID` | `station-01` | **Names which station this container is** (used in the MQTT topic, payload, and default `DEVICE_ID`). |
 | `DEVICE_ID` | `sensor-<STATION_ID>` | MQTT client id + `device_id` field in the payload. |
 | `BASIN_ID` | `red-river` | Basin name, echoed in every payload. |
 | `MQTT_BROKER` / `MQTT_PORT` | `mosquitto` / `1883` | Edge broker (a service name — never `localhost`). |
 | `PUBLISH_INTERVAL` | `2` | Seconds between publishes. |
+
+### Per-station basin profile (set per container in [`docker-compose.yml`](../docker-compose.yml))
+
+These used to be a hardcoded `BASIN` table in `sensor.py`; they are now env, so the
+basin topology can be retuned — or stations added — without touching code. `.env`
+can't hold them (it is shared by every service), so each `sensor-station-*` service
+defines its own block. Defaults below are station-01.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `STATION_NAME` | `Yên Bái` | Gauge label, echoed in every payload (drives the ThingsBoard map). |
+| `STATION_ROLE` | `upstream` | `upstream` / `midstream` / `downstream` — purely descriptive. |
+| `STATION_LAT` / `STATION_LON` | `21.7050` / `104.8690` | Real Red River gauge position (for the map). |
+| `STATION_LAG` | `0.0` | Travel-time delay as a **fraction of `LOOP_PERIOD`** (not seconds) — spreads the wave downstream. Keep well under the calm fraction. |
+| `STATION_BASE` | `1.0` | Resting water level (m) — higher downstream. |
+| `STATION_PEAK` | `4.8` | Crest level (m) at sustained peak rain — sets the severity band; `gain` is derived from it. |
+| `STATION_CAP` | `6.5` | Hard safety clamp (m), far above `peak`. |
 
 ### Shared storm knobs (same for all stations → keeps them correlated)
 
@@ -124,21 +141,22 @@ recedes afterward. The inflow `gain` is **derived** from the crest you want
 drifts** acidic (~4 %) or alkaline (~4 %) to exercise the gateway's water-quality
 rule (PRD: *"nước đục/pH bất thường"*).
 
-### The basin topology (`BASIN` table in `sensor.py`)
+### The basin topology (per-station `STATION_*` env in `docker-compose.yml`)
 
 This is a **major-storm** scenario: **every** station crosses the **emergency**
 threshold (4.0 m), staggered downstream so the wave *and* the rising crest are both
-visible. Edit this table to change the scenario.
+visible. Edit each station's env block in `docker-compose.yml` to change the scenario
+(these are the shipped defaults):
 
-| Station | Gauge | Role | `lag` | `base` | `peak` (crest) | Severity reached |
+| Station | `STATION_NAME` | `STATION_ROLE` | `STATION_LAG` | `STATION_BASE` | `STATION_PEAK` (crest) | Severity reached |
 |---|---|---|---|---|---|---|
 | `station-01` | Yên Bái | upstream | `0.0` | 1.0 m | ~4.8 m | EMERGENCY (first, lowest) |
 | `station-02` | Sơn Tây | midstream | `0.06` | 1.5 m | ~5.5 m | EMERGENCY |
 | `station-03` | Hà Nội | downstream | `0.12` | 2.0 m | ~6.2 m | EMERGENCY (last, highest) |
 
-Each row also carries `lat`/`lon` (real Red River gauge positions) — the gateway
-forwards these to ThingsBoard so stations appear on a map widget. `cap` is a hard
-safety clamp far above `peak`.
+Each block also carries `STATION_LAT`/`STATION_LON` (real Red River gauge positions)
+— the gateway forwards these to ThingsBoard so stations appear on a map widget.
+`STATION_CAP` is a hard safety clamp far above `peak`.
 
 > The longer design notes (tuning the wave, lead time, why correlation is pure
 > shared-clock + lag) are in [`docs/scenario.md`](../docs/scenario.md). **Note:**
@@ -211,12 +229,12 @@ storm.
 
 ## Extending
 
-- **Change the scenario** (who floods, how high, how staggered): edit the `BASIN`
-  table — `peak` sets the crest/severity, `lag` spreads the wave, `base` sets the
-  resting stage.
-- **Add a 4th station:** add a row to `BASIN`, add `STATIONS=…,station-04` to
-  `.env`, and add `sensor-station-04` + `actuator-station-04` services in
-  `docker-compose.yml`.
+- **Change the scenario** (who floods, how high, how staggered): edit a station's
+  `STATION_*` env block in `docker-compose.yml` — `STATION_PEAK` sets the
+  crest/severity, `STATION_LAG` spreads the wave, `STATION_BASE` sets the resting stage.
+- **Add a 4th station:** add `sensor-station-04` + `actuator-station-04` services in
+  `docker-compose.yml` (give the sensor its own `STATION_*` block), and add
+  `STATIONS=…,station-04` to `.env`.
 - **New telemetry field:** add it to the `payload` here, persist it in
   [`gateway/gateway.py`](../gateway/gateway.py) `write_telemetry()`, and add a
   Grafana panel.

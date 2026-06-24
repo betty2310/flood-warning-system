@@ -24,7 +24,6 @@ from fastapi import FastAPI, HTTPException
 from influxdb_client import InfluxDBClient
 from pydantic import BaseModel
 
-
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mosquitto")
 MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
 
@@ -33,7 +32,11 @@ INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN", "flood-edge-token-please-change")
 INFLUXDB_ORG = os.getenv("INFLUXDB_ORG", "hust")
 INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET", "iot")
 
-STATIONS = [s.strip() for s in os.getenv("STATIONS", "station-01,station-02,station-03").split(",") if s.strip()]
+STATIONS = [
+    s.strip()
+    for s in os.getenv("STATIONS", "station-01,station-02,station-03").split(",")
+    if s.strip()
+]
 VALID_TARGETS = {"pump", "gate", "siren", "board"}
 
 ctx = {}  # holds influx_client, query_api, mqtt_client
@@ -109,7 +112,10 @@ def health():
         influx_ok = h.status == "pass"
     except Exception as exc:
         return {"status": "degraded", "influxdb": f"error: {exc}"}
-    return {"status": "ok" if influx_ok else "degraded", "influxdb": "up" if influx_ok else "down"}
+    return {
+        "status": "ok" if influx_ok else "degraded",
+        "influxdb": "up" if influx_ok else "down",
+    }
 
 
 @app.get("/stations")
@@ -118,11 +124,13 @@ def list_stations():
     for station_id in STATIONS:
         telemetry = _clean(_latest("water_telemetry", station_id))
         status = _clean(_latest("actuator_status", station_id))
-        out.append({
-            "station_id": station_id,
-            "water_level": telemetry.get("water_level") if telemetry else None,
-            "board": status.get("board") if status else None,
-        })
+        out.append(
+            {
+                "station_id": station_id,
+                "water_level": telemetry.get("water_level") if telemetry else None,
+                "board": status.get("board") if status else None,
+            }
+        )
     return {"stations": out}
 
 
@@ -163,7 +171,9 @@ def send_command(station_id: str, body: CommandBody):
     if station_id not in STATIONS:
         raise HTTPException(status_code=404, detail=f"unknown station {station_id}")
     if body.target not in VALID_TARGETS:
-        raise HTTPException(status_code=400, detail=f"target must be one of {sorted(VALID_TARGETS)}")
+        raise HTTPException(
+            status_code=400, detail=f"target must be one of {sorted(VALID_TARGETS)}"
+        )
 
     command = {
         "station_id": station_id,

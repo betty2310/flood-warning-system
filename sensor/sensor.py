@@ -18,9 +18,10 @@ accumulates to a higher crest as it travels. The correlation is pure shared-cloc
     (random walk) makes each storm surge and lull, so the level wobbles around its
     peak every cycle instead of pinning to a clamp.
 
-Each container instance is one station, selected purely by STATION_ID. The shared
-storm knobs (loop period, peak rain, gust, epoch) come from env so the whole
-scenario can be retuned without code changes.
+Each container instance is one station: its profile (name, position, lag, base,
+peak, cap) and the shared storm knobs (loop period, peak rain, gust, epoch) all
+come from env, so the whole basin can be retuned -- or stations added -- without
+code changes. docker-compose.yml defines one env block per station.
 """
 
 import json
@@ -79,56 +80,38 @@ RISING = 0.15 * LOOP_PERIOD
 PLATEAU = 0.30 * LOOP_PERIOD
 RECEDING = LOOP_PERIOD - CALM - RISING - PLATEAU
 
-# ---- Basin topology: one coherent table for the whole river ----
+# ---- This station's basin profile (from env; defined per-station in docker-compose.yml) ----
 # Every station reads the SAME storm, offset by its travel-time `lag`, and integrates
 # it so the level floats toward its own `peak` at sustained peak rain. `peak` fixes
 # the crest (and thus the severity band); the inflow `gain` is DERIVED from it in
-# main(), so you only ever tune the crest you want to see.
-#   lag       : travel-time delay as a FRACTION of LOOP_PERIOD (NOT seconds), so the
-#               wave marches at the same visible pace at any cycle length. (Absolute
-#               seconds, e.g. 60s on a 120s loop = half a cycle, push the downstream
-#               station to the OPPOSITE phase -- it looks anti-correlated, not like a
-#               wave. Keep the max lag well under CALM's fraction.)
-#   base      : resting water level (m) -- higher downstream (bigger river stage)
-#   peak      : crest water level (m) at sustained peak rain -- the severity ceiling
-#   cap       : hard safety clamp (m), well above peak; physics keeps level < cap
-#   lat, lon  : real gauge position on the Red River (for the ThingsBoard map)
-# Major-storm scenario: every peak is above the 4.0 m emergency threshold, staggered
-# upstream->downstream so the wave AND the rising crest are both readable -- the storm
-# hits st1 first, then st2, then st3 (each higher), and recedes in the same order.
-BASIN = {
-    "station-01": {
-        "name": "Yên Bái",
-        "role": "upstream",
-        "lat": 21.7050,
-        "lon": 104.8690,
-        "lag": 0.0,  # head of the wave (fraction of LOOP_PERIOD)
-        "base": 1.0,
-        "peak": 4.8,
-        "cap": 6.5,
-    },
-    "station-02": {
-        "name": "Sơn Tây",
-        "role": "midstream",
-        "lat": 21.1480,
-        "lon": 105.5040,
-        "lag": 0.06,  # ~6% of a cycle behind st1
-        "base": 1.5,
-        "peak": 5.5,
-        "cap": 7.5,
-    },
-    "station-03": {
-        "name": "Hà Nội",
-        "role": "downstream",
-        "lat": 21.0430,
-        "lon": 105.8600,
-        "lag": 0.12,  # ~12% of a cycle behind st1 (downstream tail)
-        "base": 2.0,
-        "peak": 6.2,
-        "cap": 8.5,
-    },
+# main(), so you only ever tune the crest you want to see. This profile used to be a
+# hardcoded BASIN table here; it now comes from env, so the basin topology can be
+# retuned -- or stations added -- without code changes (docker-compose.yml defines one
+# env block per station). Defaults below describe station-01 (upstream, Yên Bái).
+#   STATION_NAME     : gauge label, echoed in every payload (for the ThingsBoard map)
+#   STATION_ROLE     : upstream | midstream | downstream (purely descriptive)
+#   STATION_LAT/LON  : real gauge position on the Red River (for the map)
+#   STATION_LAG      : travel-time delay as a FRACTION of LOOP_PERIOD (NOT seconds), so
+#                      the wave marches at the same visible pace at any cycle length.
+#                      (Absolute seconds, e.g. 60s on a 120s loop = half a cycle, push
+#                      the downstream station to the OPPOSITE phase -- it looks
+#                      anti-correlated, not like a wave. Keep max lag well under CALM.)
+#   STATION_BASE     : resting water level (m) -- higher downstream (bigger river stage)
+#   STATION_PEAK     : crest water level (m) at sustained peak rain -- the severity ceiling
+#   STATION_CAP      : hard safety clamp (m), well above peak; physics keeps level < cap
+# Major-storm scenario (the docker-compose defaults): every peak is above the 4.0 m
+# emergency threshold, staggered upstream->downstream so the wave AND the rising crest
+# are both readable -- the storm hits st1 first, then st2, then st3 (each higher).
+STATION = {
+    "name": os.getenv("STATION_NAME", "Yên Bái"),
+    "role": os.getenv("STATION_ROLE", "upstream"),
+    "lat": float(os.getenv("STATION_LAT", "21.7050")),
+    "lon": float(os.getenv("STATION_LON", "104.8690")),
+    "lag": float(os.getenv("STATION_LAG", "0.0")),
+    "base": float(os.getenv("STATION_BASE", "1.0")),
+    "peak": float(os.getenv("STATION_PEAK", "4.8")),
+    "cap": float(os.getenv("STATION_CAP", "6.5")),
 }
-STATION = BASIN.get(STATION_ID, BASIN["station-01"])
 
 
 def storm_intensity(phase):

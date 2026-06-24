@@ -47,11 +47,6 @@ services:
     networks:
       - flood-net
 
-  # ---------------------------------------------------------------
-  # Virtual sensors — one image, three stations (env-parameterized)
-  # Stations differ ONLY by STATION_ID; the correlated basin storm and the
-  # per-station lag/base/cap/gain live in the BASIN table in sensor/sensor.py.
-  # ---------------------------------------------------------------
   sensor-station-01:
     build: ./sensor
     container_name: sensor-station-01
@@ -59,6 +54,14 @@ services:
     environment:
       STATION_ID: station-01
       DEVICE_ID: sensor-station-01
+      STATION_NAME: Yên Bái
+      STATION_ROLE: upstream
+      STATION_LAT: "21.7050"
+      STATION_LON: "104.8690"
+      STATION_LAG: "0.0"
+      STATION_BASE: "1.0"
+      STATION_PEAK: "4.8"
+      STATION_CAP: "6.5"
       PYTHONUNBUFFERED: "1"
     depends_on:
       - mosquitto
@@ -72,6 +75,14 @@ services:
     environment:
       STATION_ID: station-02
       DEVICE_ID: sensor-station-02
+      STATION_NAME: Sơn Tây
+      STATION_ROLE: midstream
+      STATION_LAT: "21.1480"
+      STATION_LON: "105.5040"
+      STATION_LAG: "0.06"
+      STATION_BASE: "1.5"
+      STATION_PEAK: "5.5"
+      STATION_CAP: "7.5"
       PYTHONUNBUFFERED: "1"
     depends_on:
       - mosquitto
@@ -85,6 +96,14 @@ services:
     environment:
       STATION_ID: station-03
       DEVICE_ID: sensor-station-03
+      STATION_NAME: Hà Nội
+      STATION_ROLE: downstream
+      STATION_LAT: "21.0430"
+      STATION_LON: "105.8600"
+      STATION_LAG: "0.12"
+      STATION_BASE: "2.0"
+      STATION_PEAK: "6.2"
+      STATION_CAP: "8.5"
       PYTHONUNBUFFERED: "1"
     depends_on:
       - mosquitto
