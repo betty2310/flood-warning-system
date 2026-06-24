@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph station["Thiết bị ảo mỗi trạm (× 3 trạm)"]
+        S["sensor-station-0X<br/>mực nước · mưa · lưu lượng · độ đục · pH"]
+        A["actuator-station-0X<br/>bơm · cửa xả · còi · bảng"]
+    end
+
+    M(["mosquitto<br/>MQTT broker biên"])
+    G["flood-gateway<br/>chuẩn hóa · rule engine · TB gateway"]
+    DB[("influxdb<br/>CSDL chuỗi thời gian")]
+    GR["grafana<br/>dashboard biên"]
+    API["flood-api<br/>REST API (FastAPI)"]
+    TB["ThingsBoard Cloud<br/>dashboard · alarm · RPC"]
+
+    S -->|telemetry| M
+    M -->|telemetry| G
+    G -->|"lệnh tự động"| M
+    M -->|lệnh| A
+    A -->|status| M
+    M -->|status| G
+    G -->|ghi| DB
+    DB -->|Flux| GR
+    API -->|đọc Flux| DB
+    API -->|lệnh thủ công| M
+    G <-->|"telemetry ↑ / RPC ↓"| TB

@@ -1,0 +1,7 @@
+flowchart TD
+    R["basin/&lt;station&gt;/…"]
+    R --> SE["sensor/telemetry<br/><i>sensor → gateway</i>"]
+    R --> AC["actuator/command<br/><i>gateway / API / RPC → actuator</i>"]
+    R --> AS["actuator/status<br/><i>actuator → gateway</i>"]
+    R --> GN["gateway/normalized<br/><i>gateway → subscribers</i>"]
+    R --> GE["gateway/event<br/><i>gateway → subscribers</i>"]

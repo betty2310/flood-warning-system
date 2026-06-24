@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant TB as ThingsBoard
+    participant API as flood-api
+    participant G as flood-gateway
+    participant M as mosquitto
+    participant A as actuator
+    participant DB as influxdb
+
+    Note over TB,API: 3 nguồn lệnh, 1 mặt phẳng điều khiển MQTT
+    G-->>M: 1) lệnh tự động từ rule engine
+    TB->>G: 2) RPC v1/gateway/rpc (setPump…)
+    G-->>M: dịch RPC → lệnh
+    API-->>M: 3) REST POST /command
+    M->>A: basin/{st}/actuator/command
+    A->>A: áp dụng pump / gate / siren / board
+    A->>M: basin/{st}/actuator/status
+    M->>G: status
+    G->>DB: ghi actuator_status
+    G-->>TB: mirror status lên cloud

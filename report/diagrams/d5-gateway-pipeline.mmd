@@ -1,0 +1,20 @@
+flowchart TD
+    subgraph in["Đăng ký MQTT (subscribe)"]
+        T["basin/+/sensor/telemetry"]
+        S["basin/+/actuator/status"]
+    end
+
+    T --> V["validate_and_normalize()<br/>+ tốc độ dâng, cờ rising"]
+    V --> RP["publish gateway/normalized"]
+    V --> WT["ghi water_telemetry → InfluxDB"]
+    V --> RE["rules.evaluate()"]
+    V --> UP["push_telemetry() → ThingsBoard"]
+
+    RE -->|"điều kiện mới (rising edge)"| EV["publish gateway/event<br/>+ ghi gateway_events"]
+    RE -->|"giá trị mong muốn đổi"| CMD["publish actuator/command"]
+
+    S --> WS["ghi actuator_status → InfluxDB"]
+    S --> MIR["mirror status → ThingsBoard"]
+
+    RPC["ThingsBoard RPC<br/>(v1/gateway/rpc)"] --> CMD
+    ATTR["TB shared attributes"] --> TH["cập nhật THRESHOLDS<br/>trực tiếp, không restart"]

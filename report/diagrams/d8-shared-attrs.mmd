@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant Op as Vận hành (TB UI / REST)
+    participant TB as ThingsBoard
+    participant G as flood-gateway
+    Op->>TB: đặt shared attribute level_warning = 3.5
+    Note over G,TB: 1) push khi thay đổi
+    TB-->>G: v1/devices/me/attributes {level_warning:3.5}
+    Note over G,TB: 2) đọc một lần khi kết nối (nạp giá trị đặt sẵn)
+    G->>TB: .../attributes/request/{id} {sharedKeys:…}
+    TB-->>G: .../attributes/response/{id} {shared:{…}}
+    G->>G: THRESHOLDS["level_warning"] = 3.5
+    G->>TB: client attr active_level_warning = 3.5 (xác nhận)

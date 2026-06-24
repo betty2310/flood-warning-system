@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant TB as ThingsBoard
+    participant G as flood-gateway
+    participant M as mosquitto
+    participant A as actuator
+    TB->>G: v1/gateway/rpc {device, method:setPump, params:true}
+    G->>M: basin/{st}/actuator/command {target:pump, action:on}
+    M->>A: lệnh
+    A->>M: status
+    G->>TB: v1/gateway/rpc {id, data:{success:true}}

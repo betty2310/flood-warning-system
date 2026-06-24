@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant S as sensor
+    participant M as mosquitto
+    participant G as flood-gateway
+    participant DB as influxdb
+    participant TB as ThingsBoard
+
+    S->>M: basin/{st}/sensor/telemetry (JSON, mỗi 2 s)
+    M->>G: telemetry
+    G->>G: validate + chuẩn hóa + tính tốc độ dâng
+    G->>M: basin/{st}/gateway/normalized
+    G->>DB: ghi water_telemetry
+    G->>TB: v1/gateway/telemetry
+    G->>G: rule engine → events + trạng thái mong muốn
