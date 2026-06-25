@@ -636,9 +636,9 @@ chờ InfluxDB health `pass` trước khi ghi.
     columns: (auto, auto, 1.4fr),
     align: (left, left, left),
     table.header[Thành viên][Họ tên — MSSV][Hạng mục phụ trách],
-    [SV1], [Dương Hữu Huynh], [Virtual sensor, virtual actuator, thiết kế topic/bản tin.],
-    [SV2], [Nông Đức Huy], [Edge gateway, rule engine, ghi InfluxDB.],
-    [SV3], [Bùi Phạm Sơn Hà], [Tích hợp ThingsBoard + dashboard + alarm, REST API, Docker Compose, Grafana, README.],
+    [SV1], [Dương Hữu Huynh], [Virtual sensor, virtual actuator, thiết kế topic/bản tin, Docker compose],
+    [SV2], [Nông Đức Huy], [Edge gateway, rule engine, ghi InfluxDB, Tích hợp Thingsboard, Rest API],
+    [SV3], [Bùi Phạm Sơn Hà], [Các giao diện dashboard Thingsboard, Grafana, Báo cáo, README.],
   ),
 ) <tbl-phancong>
 

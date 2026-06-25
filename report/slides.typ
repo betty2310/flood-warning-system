@@ -444,6 +444,20 @@ docker compose down                   # dừng (thêm -v để xóa volume)
 
 ==
 
+#figure(
+  caption: [Phân công cho nhóm ba thành viên.],
+  table(
+    columns: (auto, auto, 1.4fr),
+    align: (left, left, left),
+    table.header[Thành viên][Họ tên — MSSV][Hạng mục phụ trách],
+    [SV1], [Dương Hữu Huynh], [Virtual sensor, virtual actuator, thiết kế topic/bản tin, Docker compose],
+    [SV2], [Nông Đức Huy], [Edge gateway, rule engine, ghi InfluxDB, Tích hợp Thingsboard, Rest API],
+    [SV3], [Bùi Phạm Sơn Hà], [Các giao diện dashboard Thingsboard, Grafana, Báo cáo, README.],
+  ),
+) <tbl-phancong>
+
+==
+
 #v(2em)
 #align(center)[
   #text(size: 1.6em, weight: "bold", fill: blue.darken(60%))[Cảm ơn đã lắng nghe!]
